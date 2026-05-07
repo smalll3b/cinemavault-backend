@@ -1,5 +1,4 @@
 import sqlite3 from 'sqlite3';
-import { promisify } from 'util';
 
 export interface User {
   id: number;
@@ -16,13 +15,13 @@ export interface Movie {
   title: string;
   year?: number;
   imdb_id?: string;
-  poster?: string;
-  plot?: string;
-  runtime?: number;
-  genre?: string;
-  director?: string;
-  actors?: string;
-  external_rating?: number;
+  poster?: string | null;
+  plot?: string | null;
+  runtime?: number | null;
+  genre?: string | null;
+  director?: string | null;
+  actors?: string | null;
+  external_rating?: number | null;
   created_by?: number;
   created_at: string;
   updated_at: string;
@@ -62,12 +61,34 @@ export class BaseRepository {
     this.db = db;
   }
 
-  protected promisifyAll() {
-    return {
-      run: promisify(this.db.run.bind(this.db)),
-      get: promisify(this.db.get.bind(this.db)),
-      all: promisify(this.db.all.bind(this.db)),
-    };
+  protected run(sql: string, params: unknown[] = []): Promise<{ lastID: number; changes: number }> {
+    return new Promise((resolve, reject) => {
+      this.db.run(sql, params as any, function (err) {
+        if (err) reject(err);
+        else resolve({ lastID: (this as any).lastID, changes: (this as any).changes });
+      });
+    });
+  }
+
+  protected get<T = any>(sql: string, params: unknown[] = []): Promise<T | undefined> {
+    return new Promise((resolve, reject) => {
+      this.db.get(sql, params as any, (err, row) => {
+        if (err) reject(err);
+        else resolve(row as T | undefined);
+      });
+    });
+  }
+
+  protected all<T = any>(sql: string, params: unknown[] = []): Promise<T[]> {
+    return new Promise((resolve, reject) => {
+      this.db.all(sql, params as any, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows as T[]);
+      });
+    });
   }
 }
+
+
+
 
