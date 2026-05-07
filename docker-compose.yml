@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  cinemavault:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - OMDB_API_KEY=${OMDB_API_KEY}
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173,http://localhost:3001
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    networks:
+      - cinemavault-network
+
+networks:
+  cinemavault-network:
+    driver: bridge
+

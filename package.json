@@ -1,0 +1,47 @@
+{
+  "name": "cinemavault-backend",
+  "version": "1.0.0",
+  "description": "Express backend for CinemaVault - a movie library management system",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src",
+    "db:init": "node src/database/init.js"
+  },
+  "keywords": [
+    "express",
+    "api",
+    "movies",
+    "jwt",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.1.2",
+    "bcryptjs": "^2.4.3",
+    "sqlite3": "^5.1.6",
+    "joi": "^17.11.0",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "morgan": "^1.10.0",
+    "helmet": "^7.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.6",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/morgan": "^1.9.9",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1"
+  }
+}
+
