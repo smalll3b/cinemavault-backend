@@ -25,13 +25,13 @@ const client = axios.create({
   timeout: 10000,
 });
 
-export const searchMovieByTitle = async (title: string): Promise<OMDBResponse | null> => {
+export const searchMovieByTitle = async (title: string, type?: string): Promise<OMDBResponse | null> => {
   try {
     const response = await client.get<OMDBResponse>('/', {
       params: {
         apikey: config.omdb.apiKey,
         t: title,
-        type: 'movie',
+        ...(type && { type }),
       },
     });
 
@@ -66,13 +66,13 @@ export const searchMovieById = async (imdbId: string): Promise<OMDBResponse | nu
   }
 };
 
-export const searchMovies = async (query: string, year?: string): Promise<any> => {
+export const searchMovies = async (query: string, year?: string, type?: string): Promise<any> => {
   try {
     const response = await client.get('/', {
       params: {
         apikey: config.omdb.apiKey,
         s: query,
-        type: 'movie',
+        ...(type && { type }),
         ...(year && { y: year }),
       },
     });
@@ -93,6 +93,7 @@ export const mapOMDBToMovie = (omdbMovie: OMDBResponse) => {
     title: omdbMovie.Title,
     year: parseInt(omdbMovie.Year, 10),
     imdb_id: omdbMovie.imdbID,
+    media_type: omdbMovie.Type !== 'N/A' ? omdbMovie.Type.toLowerCase() : 'movie',
     poster: omdbMovie.Poster !== 'N/A' ? omdbMovie.Poster : null,
     plot: omdbMovie.Plot !== 'N/A' ? omdbMovie.Plot : null,
     runtime: omdbMovie.Runtime !== 'N/A' ? parseInt(omdbMovie.Runtime, 10) : null,
@@ -102,4 +103,5 @@ export const mapOMDBToMovie = (omdbMovie: OMDBResponse) => {
     external_rating: omdbMovie.imdbRating !== 'N/A' ? parseFloat(omdbMovie.imdbRating) : null,
   };
 };
+
 

@@ -6,6 +6,19 @@ export class MovieRepository extends BaseRepository {
     super(db);
   }
 
+  private normalizeMovie(movie?: Movie | null): Movie | undefined {
+    if (!movie) return movie ?? undefined;
+
+    const mediaType = movie.media_type ?? movie.type ?? movie.mediaType ?? 'movie';
+
+    return {
+      ...movie,
+      media_type: mediaType,
+      type: mediaType,
+      mediaType,
+    };
+  }
+
   async createMovie(movieData: Partial<Movie>): Promise<Movie> {
     const fields = Object.keys(movieData).join(', ');
     const placeholders = Object.keys(movieData).map(() => '?').join(', ');
@@ -22,23 +35,36 @@ export class MovieRepository extends BaseRepository {
   }
 
   async getMovieById(id: number): Promise<Movie | undefined> {
-    return this.get<Movie>(`SELECT * FROM movies WHERE id = ?`, [id]);
+    return this.normalizeMovie(await this.get<Movie>(`SELECT * FROM movies WHERE id = ?`, [id]));
   }
 
   async getMovieByImdbId(imdbId: string): Promise<Movie | undefined> {
-    return this.get<Movie>(`SELECT * FROM movies WHERE imdb_id = ?`, [imdbId]);
+    return this.normalizeMovie(await this.get<Movie>(`SELECT * FROM movies WHERE imdb_id = ?`, [imdbId]));
   }
 
   async getAllMovies(limit: number = 50, offset: number = 0): Promise<Movie[]> {
-    return this.all<Movie>(`SELECT * FROM movies LIMIT ? OFFSET ?`, [limit, offset]);
+    const movies = await this.all<Movie>(`SELECT * FROM movies LIMIT ? OFFSET ?`, [limit, offset]);
+    return movies.map((movie) => this.normalizeMovie(movie) as Movie);
   }
 
-  async searchMovies(query: string, limit: number = 50, offset: number = 0): Promise<Movie[]> {
+  async searchMovies(query: string, limit: number = 50, offset: number = 0, mediaType?: string): Promise<Movie[]> {
     const searchTerm = `%${query}%`;
-    return this.all<Movie>(
-      `SELECT * FROM movies WHERE title LIKE ? OR director LIKE ? OR actors LIKE ? LIMIT ? OFFSET ?`,
-      [searchTerm, searchTerm, searchTerm, limit, offset]
+    const conditions = [`(title LIKE ? OR director LIKE ? OR actors LIKE ?)`];
+    const params: unknown[] = [searchTerm, searchTerm, searchTerm];
+
+    if (mediaType) {
+      conditions.push(`media_type = ?`);
+      params.push(mediaType);
+    }
+
+    params.push(limit, offset);
+
+    const movies = await this.all<Movie>(
+      `SELECT * FROM movies WHERE ${conditions.join(' AND ')} LIMIT ? OFFSET ?`,
+      params
     );
+
+    return movies.map((movie) => this.normalizeMovie(movie) as Movie);
   }
 
   async updateMovie(id: number, updates: Partial<Movie>): Promise<Movie> {
@@ -63,6 +89,8 @@ export class MovieRepository extends BaseRepository {
     return result?.count ?? 0;
   }
 }
+
+
 
 
 

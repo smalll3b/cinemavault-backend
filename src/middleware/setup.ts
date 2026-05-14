@@ -5,15 +5,37 @@ import morgan from 'morgan';
 import { config } from '../config';
 import { AppError } from '../utils/errors';
 
+const isLocalDevelopmentOrigin = (origin: string): boolean => {
+  try {
+    const url = new URL(origin);
+    return url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  } catch {
+    return false;
+  }
+};
+
 // CORS Middleware
 export const setupCors = (app: Express) => {
+  const allowedOrigins = config.cors.allowedOrigins.map((origin) => origin.trim()).filter(Boolean);
+
   const corsOptions = {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-      if (!origin || config.cors.allowedOrigins.includes(origin)) {
+      if (!origin) {
         callback(null, true);
-      } else {
-        callback(new Error('CORS not allowed'), false);
+        return;
       }
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      if (config.isDevelopment && isLocalDevelopmentOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('CORS not allowed'), false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -74,5 +96,6 @@ export const setup404Handler = (app: Express) => {
     });
   });
 };
+
 
 

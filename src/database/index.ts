@@ -29,6 +29,7 @@ export const getDatabase = (): Promise<sqlite3.Database> => {
 export const initializeDatabase = async (): Promise<void> => {
   const database = await getDatabase();
   const run = promisify(database.run.bind(database));
+  const all = promisify(database.all.bind(database));
 
   try {
     console.log('Initializing database...');
@@ -53,6 +54,7 @@ export const initializeDatabase = async (): Promise<void> => {
         title TEXT NOT NULL,
         year INTEGER,
         imdb_id TEXT UNIQUE,
+        media_type TEXT NOT NULL DEFAULT 'movie',
         poster TEXT,
         plot TEXT,
         runtime INTEGER,
@@ -118,6 +120,19 @@ export const initializeDatabase = async (): Promise<void> => {
     await run(`CREATE INDEX IF NOT EXISTS idx_ratings_movie_id ON ratings(movie_id)`);
     await run(`CREATE INDEX IF NOT EXISTS idx_reviews_movie_id ON reviews(movie_id)`);
 
+    const movieColumns = (await all(`PRAGMA table_info(movies)`)) as Array<{ name: string }>;
+    const hasMediaTypeColumn = movieColumns.some((column: { name: string }) => column.name === 'media_type');
+
+    if (!hasMediaTypeColumn) {
+      await run(`ALTER TABLE movies ADD COLUMN media_type TEXT NOT NULL DEFAULT 'movie'`);
+    }
+
+    await run(`
+      UPDATE movies
+      SET media_type = 'movie'
+      WHERE media_type IS NULL OR TRIM(media_type) = ''
+    `);
+
     console.log('Database initialized successfully!');
   } catch (error) {
     console.error('Error initializing database:', error);
@@ -137,4 +152,6 @@ export const closeDatabase = (): Promise<void> => {
     }
   });
 };
+
+
 

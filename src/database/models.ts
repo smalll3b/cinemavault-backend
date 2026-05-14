@@ -15,6 +15,9 @@ export interface Movie {
   title: string;
   year?: number;
   imdb_id?: string;
+  media_type?: 'movie' | 'series' | 'episode' | 'game' | string | null;
+  type?: 'movie' | 'series' | 'episode' | 'game' | string | null;
+  mediaType?: 'movie' | 'series' | 'episode' | 'game' | string | null;
   poster?: string | null;
   plot?: string | null;
   runtime?: number | null;
@@ -88,6 +91,8 @@ export class BaseRepository {
     });
   }
 }
+
+
 
 
 

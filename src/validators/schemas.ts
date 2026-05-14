@@ -30,6 +30,7 @@ export const movieSchemas = {
     }),
     year: Joi.number().integer().min(1900).max(new Date().getFullYear() + 5),
     imdb_id: Joi.string(),
+    media_type: Joi.string().valid('movie', 'series', 'episode', 'game'),
     poster: Joi.string().uri(),
     plot: Joi.string().max(2000),
     runtime: Joi.number().integer(),
@@ -42,6 +43,7 @@ export const movieSchemas = {
   update: Joi.object({
     title: Joi.string(),
     year: Joi.number().integer().min(1900).max(new Date().getFullYear() + 5),
+    media_type: Joi.string().valid('movie', 'series', 'episode', 'game'),
     poster: Joi.string().uri(),
     plot: Joi.string().max(2000),
     runtime: Joi.number().integer(),
@@ -55,6 +57,7 @@ export const movieSchemas = {
     query: Joi.string().required().min(1),
     limit: Joi.number().integer().min(1).max(100).default(50),
     offset: Joi.number().integer().min(0).default(0),
+    media_type: Joi.string().valid('movie', 'series', 'episode', 'game'),
   }),
 };
 
@@ -99,4 +102,5 @@ export const reviewSchemas = {
     rating: Joi.number().min(1).max(10),
   }),
 };
+
 

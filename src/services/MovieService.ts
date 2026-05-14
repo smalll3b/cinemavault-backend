@@ -36,11 +36,11 @@ export class MovieService {
     return this.movieRepository.getAllMovies(limit, offset);
   }
 
-  async searchMovies(query: string, limit: number = 50, offset: number = 0): Promise<Movie[]> {
+  async searchMovies(query: string, limit: number = 50, offset: number = 0, mediaType?: string): Promise<Movie[]> {
     if (!query || query.trim().length === 0) {
       throw new AppError(400, 'Search query is required');
     }
-    return this.movieRepository.searchMovies(query, limit, offset);
+    return this.movieRepository.searchMovies(query, limit, offset, mediaType);
   }
 
   async updateMovie(id: number, updates: Partial<Movie>, userId: number): Promise<Movie> {
@@ -65,8 +65,8 @@ export class MovieService {
     await this.movieRepository.deleteMovie(id);
   }
 
-  async getMovieFromOMDB(title: string): Promise<Partial<Movie> | null> {
-    const omdbMovie = await searchMovieByTitle(title);
+  async getMovieFromOMDB(title: string, type?: string): Promise<Partial<Movie> | null> {
+    const omdbMovie = await searchMovieByTitle(title, type);
     if (!omdbMovie) {
       return null;
     }
@@ -105,4 +105,5 @@ export class MovieService {
     return this.movieRepository.getMovieCount();
   }
 }
+
 

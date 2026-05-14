@@ -14,6 +14,7 @@ export class MovieController {
 
       const { title, year, imdb_id, poster, plot, runtime, genre, director, actors, external_rating } =
         req.validatedBody;
+      const { media_type } = req.validatedBody;
       const db = await getDatabase();
       const movieService = new MovieService(db);
 
@@ -29,6 +30,7 @@ export class MovieController {
           director,
           actors,
           external_rating,
+          media_type,
         },
         userId
       );
@@ -72,11 +74,16 @@ export class MovieController {
 
   async searchMovies(req: Request, res: Response): Promise<void> {
     try {
-      const { query, limit = 50, offset = 0 } = req.validatedQuery;
+      const { query, limit = 50, offset = 0, media_type } = req.validatedQuery;
       const db = await getDatabase();
       const movieService = new MovieService(db);
 
-      const movies = await movieService.searchMovies(query, parseInt(limit as string, 10), parseInt(offset as string, 10));
+      const movies = await movieService.searchMovies(
+        query,
+        parseInt(limit as string, 10),
+        parseInt(offset as string, 10),
+        media_type
+      );
 
       res.status(200).json(createSuccessResponse({ movies, count: movies.length }, 'Movies searched successfully'));
     } catch (error: any) {
@@ -145,4 +152,5 @@ export class MovieController {
     }
   }
 }
+
 
